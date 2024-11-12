@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @db.VarChar(30)
+  name          String?  @db.VarChar(20)
+  gender        String?  @db.VarChar(10)
+  age           Int?
+  address       String?  @db.VarChar(40)
+  address2      String?  @db.VarChar(40)
+  stat          String?  @db.VarChar(15)
+  inactive_date DateTime? @db.DateTime(6)
+  social_type   String?  @db.VarChar(10)
+  created_at    DateTime @db.DateTime(6)
+  updated_at    DateTime @db.DateTime(6)
+  email         String?  @db.VarChar(50)
+  point         Int?
+  
+  MemberMission MemberMission[]
+  MemberAgree   MemberAgree[]
+  MemberPrefer  MemberPrefer[]
+}
+
+model Region {
+  id         String   @id @db.VarChar(30)
+  name       String?  @db.VarChar(20)
+  created_at DateTime @db.DateTime(6)
+  updated_at DateTime @db.DateTime(6)
+
+  Store Store[]
+}
+
+model Store {
+  id         String   @id @db.VarChar(30)
+  region_id  String?  @db.VarChar(30)
+  name       String?  @db.VarChar(50)
+  address    String?  @db.VarChar(50)
+  created_at DateTime @db.DateTime(6)
+  updated_at DateTime @db.DateTime(6)
+
+  Region     Region?  @relation(fields: [region_id], references: [id])
+  Mission    Mission[]
+  Review     Review[]
+}
+
+model Mission {
+  id           String   @id @db.VarChar(30)
+  store_id     String?  @db.VarChar(30)
+  reward       Int?
+  deadline     DateTime?
+  mission_text String?
+  created_at   DateTime @db.DateTime(6)
+  updated_at   DateTime @db.DateTime(6)
+
+  Store         Store?         @relation(fields: [store_id], references: [id])
+  MemberMission MemberMission[]
+}
+
+model MemberMission {
+  id         String   @id @db.VarChar(30)
+  member_id  String?  @db.VarChar(30)
+  mission_id String?  @db.VarChar(30)
+  status     String?  @db.VarChar(15)
+  created_at DateTime @db.DateTime(6)
+  updated_at DateTime @db.DateTime(6)
+
+  User    User?    @relation(fields: [member_id], references: [id])
+  Mission Mission? @relation(fields: [mission_id], references: [id])
+}
+
+model Terms {
+  id         String   @id @db.VarChar(30)
+  title      String?  @db.VarChar(20)
+  body       String?
+  optional   Boolean?
+  created_at DateTime @db.DateTime(6)
+  updated_at DateTime @db.DateTime(6)
+
+  MemberAgree MemberAgree[]
+}
+
+model MemberAgree {
+  id         String   @id @db.VarChar(30)
+  member_id  String?  @db.VarChar(30)
+  terms_id   String?  @db.VarChar(30)
+  created_at DateTime @db.DateTime(6)
+  updated_at DateTime @db.DateTime(6)
+
+  User  User?  @relation(fields: [member_id], references: [id])
+  Terms Terms? @relation(fields: [terms_id], references: [id])
+}
+
+model FoodCategory {
+  id         String   @id @db.VarChar(30)
+  name       String?  @db.VarChar(15)
+  created_at DateTime @db.DateTime(6)
+  updated_at DateTime @db.DateTime(6)
+
+  MemberPrefer MemberPrefer[]
+}
+
+
+model MemberPrefer {
+  id          String   @id @db.VarChar(30)
+  member_id   String?  @db.VarChar(30)
+  category_id String?  @db.VarChar(30)
+  created_at  DateTime @db.DateTime(6)
+  updated_at  DateTime @db.DateTime(6)
+
+  User         User?         @relation(fields: [member_id], references: [id])
+  FoodCategory FoodCategory? @relation(fields: [category_id], references: [id])
+}
+
+model Review {
+  id         String   @id @db.VarChar(30)
+  name       String   @db.VarChar(50)
+  store_id   String?  @db.VarChar(30)
+  text       String?
+  created_at DateTime @db.DateTime(6)
+  updated_at DateTime @db.DateTime(6)
+
+  Store Store? @relation(fields: [store_id], references: [id])
+}
